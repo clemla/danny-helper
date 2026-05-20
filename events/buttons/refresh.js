@@ -14,9 +14,13 @@ module.exports = {
 
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {})
 
-		const timeLeft = 5 * 60 * 1000 - Date.now() + (interaction.message.editedTimestamp ?? 0)
+		const cooldown = interaction.member.permissions.has(PermissionFlagsBits.ManageMessages) ? 1 : 5
+		const timeLeft = cooldown * 60 * 1000 - Date.now() + (interaction.message.editedTimestamp ?? 0)
 		if (timeLeft > 0 && interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
-			return interaction.editReply({ content: `Refresh again <t:${Math.floor((Date.now() + timeLeft) / 1000)}:R>`, flags: MessageFlags.Ephemeral })
+			return interaction.editReply({
+				content: `Refresh again <t:${Math.floor((Date.now() + timeLeft) / 1000)}:R>${cooldown == 5 ? " (already lowered for staff)" : ""}`,
+				flags: MessageFlags.Ephemeral,
+			})
 
 		const games = []
 		const quantities = {}
