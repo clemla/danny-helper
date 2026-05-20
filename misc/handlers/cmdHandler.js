@@ -30,6 +30,7 @@ module.exports = async (client, dir) => {
 		let args = cmd.args ? cmd.args(int) : []
 		if (typeof args !== "object") args = [args]
 
+		args = Array.isArray(args) ? args : []
 		cmd.execute(int, client, ...args)
 	})
 
