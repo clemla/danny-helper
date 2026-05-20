@@ -18,7 +18,7 @@ module.exports = {
 		const timeLeft = cooldown * 60 * 1000 - Date.now() + (interaction.message.editedTimestamp ?? 0)
 		if (timeLeft > 0 && interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
 			return interaction.editReply({
-				content: `Refresh again <t:${Math.floor((Date.now() + timeLeft) / 1000)}:R>${cooldown == 5 ? " (already lowered for staff)" : ""}`,
+				content: `Refresh again <t:${Math.floor((Date.now() + timeLeft) / 1000)}:R>${cooldown == 1 ? " (already lowered for staff)" : ""}`,
 				flags: MessageFlags.Ephemeral,
 			})
 

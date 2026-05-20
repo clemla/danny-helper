@@ -1,1 +1,3 @@
 - [ ] Make /restock restart proof cause shrinkening customId aint that hard in the end..
+- [ ] Fix handler hot reload
+- [ ] Switch on typescript :pray:
