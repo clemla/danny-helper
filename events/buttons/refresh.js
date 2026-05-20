@@ -1,4 +1,4 @@
-const { MessageFlags, ComponentType } = require("discord.js")
+const { MessageFlags, ComponentType, PermissionFlagsBits } = require("discord.js")
 const getRestockMessage = require("functions/getRestockMessage")
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {})
 
 		const timeLeft = 5 * 60 * 1000 - Date.now() + (interaction.message.editedTimestamp ?? 0)
-		if (timeLeft > 0)
+		if (timeLeft > 0 && interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
 			return interaction.editReply({ content: `Refresh again <t:${Math.floor((Date.now() + timeLeft) / 1000)}:R>`, flags: MessageFlags.Ephemeral })
 
 		const games = []
