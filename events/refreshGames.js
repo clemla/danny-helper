@@ -29,6 +29,6 @@ module.exports = {
 			list[id] = game[id].data.name
 		}
 
-		writeFileSync("misc/game_list.json", JSON.stringify(list, null, 2))
+		writeFileSync("misc/toWatch/game_list.json", JSON.stringify(list, null, 2))
 	},
 }

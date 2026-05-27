@@ -6,6 +6,8 @@ module.exports = async (dir) => {
 	let files = []
 
 	function scrap(folder) {
+		// if (!fs.statSync(folder).isDirectory()) return files.push(require(folder))
+
 		fs.readdirSync(folder).forEach((file) => {
 			let full = path.resolve(folder, file)
 			if (fs.statSync(full).isDirectory()) return scrap(full)
@@ -31,7 +33,7 @@ module.exports = async (dir) => {
 
 	watcher.on("all", async (ev, name, args) => {
 		try {
-			if (!name.endsWith(".js")) return
+			if (![".js", ".json"].includes(path.extname(name))) return
 
 			switch (ev) {
 				case "add": {

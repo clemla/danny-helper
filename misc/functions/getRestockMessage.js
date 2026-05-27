@@ -11,7 +11,7 @@ const {
 } = require("discord.js")
 
 module.exports = async ({ games, data }) => {
-	const list = require("misc/game_list.json")
+	const list = require("misc/toWatch/game_list.json")
 	const res = await fetch(process.env.quota_endpoint)
 	const json = await res.json()
 	const output = []

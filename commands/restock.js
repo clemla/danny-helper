@@ -39,7 +39,7 @@ module.exports = {
 	 * @param {import('discord.js').Client} client
 	 */
 	execute: async (interaction, client) => {
-		const list = require("misc/game_list.json")
+		const list = require("misc/toWatch/game_list.json")
 		const chunkSize = 20
 		const chunks = []
 		const entries = Object.entries(list).sort(([, name1], [, name2]) => name1.localeCompare(name2))

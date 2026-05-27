@@ -13,7 +13,7 @@ require("misc/handlers/evtHandler")(client, path.resolve(__dirname, "events"))
 
 require("misc/handlers/watcher")(path.resolve(__dirname, "misc", "messages"))
 require("misc/handlers/watcher")(path.resolve(__dirname, "misc", "functions"))
-require("misc/handlers/watcher")(path.resolve(__dirname, "misc", "game_list.json"))
+require("misc/handlers/watcher")(path.resolve(__dirname, "misc", "toWatch"))
 
 const args = process.argv.slice(2)
 const isDev = args.includes("-dev")
