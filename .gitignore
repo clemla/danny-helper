@@ -9,4 +9,4 @@ node_modules
 .env.local
 
 # typescript port
-typescript
+# typescript
