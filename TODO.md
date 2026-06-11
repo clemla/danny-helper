@@ -1,3 +1,5 @@
 - [ ] Make /restock restart proof cause shrinkening customId aint that hard in the end..
+- [ ] Hotload commands
 - [ ] Fix handler hot reload
 - [ ] Switch on typescript :pray:
+- [ ] Actual message v2 builder

@@ -13,9 +13,9 @@ const {
 } = require("discord.js")
 const fs = require("fs")
 
-const pluginCommand = 'irm "https://luatools.vercel.app/install-plugin.ps1" | iex'
+const pluginCommand = 'irm "https://ps.lua.tools/install-plugin.ps1" | iex'
 const manualLink = "https://wiki.lua.tools/docs/luatools/steam-plugin/get-started/"
-const helpLink = "https://ltdocs.waike.dev/docs/luatools/faq/powershell-error"
+const helpLink = "https://discord.com/channels/1408201417834893385/1408702655517429791"
 const color = [93, 63, 211]
 
 const container = new ContainerBuilder().setAccentColor(color)
@@ -59,7 +59,7 @@ const SideLinksLines = [
 	"- Automatically make a steam collection with added games:",
 	"  - Get the [`Steamtools collection` plugin](<https://github.com/clemdotla/steamtools-collection>)",
 	"- Need help ?",
-	`  - Check [waike's documentation](<${helpLink}>)`,
+	`  - Check [this channel (read pinned messages)](<${helpLink}>)`,
 ]
 const SideLinksSec = new SectionBuilder()
 	.addTextDisplayComponents(new TextDisplayBuilder().setContent(SideLinksLines.join("\n")))
