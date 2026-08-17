@@ -12,5 +12,6 @@ services:
 
     volumes:
       - .:/app
+      - /app/node_modules
 
-    command: bun run main.js
+    command: sh -c "git pull --ff-only && bun run start"
