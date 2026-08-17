@@ -7,8 +7,8 @@
 	},
 	"name": "danny-helper",
 	"scripts": {
-		"start": "git pull ; bun run main.js",
-		"dev": "git pull ; bun run main.js -dev"
+		"start": "bun run .",
+		"dev": "bun run . -dev"
 	},
 	"private": true,
 	"devDependencies": {
