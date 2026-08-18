@@ -1,6 +1,7 @@
 services:
   bot:
     container_name: danny-helper
+    io.portainer.accesscontrol.teams: "1"
 
     build:
       context: .
