@@ -1,0 +1,17 @@
+services:
+  bot:
+    container_name: danny-helper
+
+    build:
+      context: .
+
+    environment:
+      NODE_ENV: production
+
+    restart: unless-stopped
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    command: sh -c "git pull --ff-only && bun run main.js"

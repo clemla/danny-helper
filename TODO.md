@@ -1,0 +1,6 @@
+- [ ] Check if event hot reload works
+- [ ] Make commands handler
+- [ ] Add commands + button listeners
+- [ ] Write a message v2 builder (discord's sucks)
+- [ ] Write all the messages with the builder
+- [ ] Add proper interfaces+comments and typings to the whole code, easier to use later (especially if i wanna work on smt that slomo made)
