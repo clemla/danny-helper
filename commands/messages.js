@@ -73,11 +73,11 @@ module.exports = {
 			"1469730951000228034",
 			"1484177015497166878",
 		]
+
 		//prettier-ignore
 		if (
-			((interaction.guildId == "1464130182364270696" && !whitelisted.includes(interaction.channelId)) ||
-			(blacklisted.includes(interaction.channelId)))
-			&& !interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)
+			(interaction.guildId == "1464130182364270696" && !whitelisted.includes(interaction.channelId)) ||
+			(blacklisted.includes(interaction.channelId))
 		) {
 			return interaction.reply({
 				content: `You cannot use this command in this channel.\nHead to${interaction.guildId == "1464130182364270696" ? " <#1469730908054491136> or" : ""} any commands/help specific channel.`,
@@ -95,14 +95,14 @@ module.exports = {
 			container = specifics[section].container
 			files = specifics[section].files
 		}
-
+		const arguments = { components: [container], files, flags: MessageFlags.IsComponentsV2, allowedMentions: { parse: [] } }
 		if (isGuild) {
 			const channel = await client.channels.fetch(interaction.channelId)
-			await channel?.send({ components: [container], files, flags: MessageFlags.IsComponentsV2, allowedMentions: { parse: [] } })
+			await channel?.send(arguments)
 
 			await interaction.editReply({ content: "Message sent in the channel." })
 		} else {
-			await interaction.editReply({ components: [container], files, flags: MessageFlags.IsComponentsV2, allowedMentions: { parse: [] } })
+			await interaction.editReply(arguments)
 		}
 	},
 }

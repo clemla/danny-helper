@@ -4,9 +4,6 @@ require("module-alias/register")
 const path = require("path")
 
 const { Client, GatewayIntentBits } = require("discord.js")
-// const client = new Client({
-// 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
-// })
 const client = new Client({ intents: [] })
 
 require("misc/handlers/cmdHandler")(client, path.resolve(__dirname, "commands"))
