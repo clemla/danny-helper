@@ -21,7 +21,7 @@ const container = new ContainerBuilder().setAccentColor(color)
 const sep = new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large)
 const sep2 = new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
 
-const TitleLines = ["# 🔑 Danny Helper", "The messages bot.", "-# Skip lines if you fee like it"]
+const TitleLines = ["# 🔑 Danny Helper", "The messages bot.", "-# Skip lines if you feel like it"]
 const TitleSec = new SectionBuilder()
 	.addTextDisplayComponents(new TextDisplayBuilder().setContent(TitleLines.join("\n")))
 	.setThumbnailAccessory(
@@ -30,15 +30,20 @@ const TitleSec = new SectionBuilder()
 
 const ExplanationLines = [
 	"## Commands",
-	"`/messages req` - Sends the requirement message from <#1465275824075833477>",
-	"- Sections: `WUB`, `Game installed`, `Specs (CanYouRunIt)`, `Hypervisor`",
-	"`/messages help` - Sends the help message from <#1465275824075833477>",
-	"- Sections: `D-Report Code`, `Anti-Tamper errors`, `Files location`",
-	"`/messages apex` - Sends the Apex Legends message from <#1465911881578446920>",
-	"- Sections: `Requirements`, `Benefits`, `Guide`",
-	"`/messages staff` - Sends the staff message from <#1497254268225192016>",
-	"`/restock` - Sends the restock message from <#1465275824075833477>",
+	"`/guide` - Full staff guide with every command, sorted by category.",
+	"`/messages req` - Sends the requirements message.",
+	"- Sections: `WUB`, `Downloaded`, `Specs`, `Hypervisor`",
+	"`/messages help` - Sends the quick help message.",
+	"- Sections: `Code missing`, `Code location`, `Anti-Tamper`, `Game files`",
+	"`/messages apex` - Sends the Apex donation message.",
+	"- Sections: `Requirement`, `Benefits`, `Guide`",
+	"`/messages plugin` - Sends the Steam plugin guide.",
+	"- Sections: `Installation`, `Usage`, `Side links`",
+	"`/messages staff` - Sends the staff guide hub.",
+	"`/restock` - Sends the restock timestamps message.",
 	"- Select the games, fill the modal for quantities, send!",
+	"`/refresh-games` - Refreshes the game list used by `/restock`.",
+	"`/delto` - Deletes messages after a given message id (up to 100).",
 ]
 
 const ExplanationText = new TextDisplayBuilder().setContent(ExplanationLines.join("\n"))

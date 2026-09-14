@@ -38,6 +38,10 @@ const data = [
 		name: "staff",
 		description: "To send the staff guide message.",
 	},
+	{
+		name: "commands",
+		description: "Post the danny bot staff command guide.",
+	},
 ]
 data.forEach((cmd) => {
 	const sub = new SlashCommandSubcommandBuilder().setName(cmd.name).setDescription(cmd.description)
@@ -61,31 +65,37 @@ module.exports = {
 	command,
 
 	execute: async (interaction, client, section) => {
-		// Special whitelist for .gg/luatools
-		const whitelisted = ["1484213202177753088", "1408847186266951781", "1408702655517429791"]
-
-		// Verify blacklisted channels (Bypass if MANAGE_MESSAGES permission)
-		const blacklisted = [
-			"1492970016662880347",
-			"1470048649366208718",
-			"1466114598301204676",
-			"1466116525848133807",
-			"1469730951000228034",
-			"1484177015497166878",
-		]
-
-		//prettier-ignore
-		if (
-			(interaction.guildId == "1464130182364270696" && !whitelisted.includes(interaction.channelId)) ||
-			(blacklisted.includes(interaction.channelId))
-		) {
-			return interaction.reply({
-				content: `You cannot use this command in this channel.\nHead to${interaction.guildId == "1464130182364270696" ? " <#1469730908054491136> or" : ""} any commands/help specific channel.`,
-				flags: MessageFlags.Ephemeral,
-			})
-		}
-
 		const sub = interaction.options.getSubcommand()
+
+		if (sub === "commands") {
+			if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
+				return interaction.reply({ content: "This is staff only.", flags: MessageFlags.Ephemeral })
+			}
+		} else {
+			// Special whitelist for .gg/luatools
+			const whitelisted = ["1484213202177753088", "1408847186266951781", "1408702655517429791"]
+
+			// Verify blacklisted channels (Bypass if MANAGE_MESSAGES permission)
+			const blacklisted = [
+				"1492970016662880347",
+				"1470048649366208718",
+				"1466114598301204676",
+				"1466116525848133807",
+				"1469730951000228034",
+				"1484177015497166878",
+			]
+
+			//prettier-ignore
+			if (
+				(interaction.guildId == "1464130182364270696" && !whitelisted.includes(interaction.channelId)) ||
+				(blacklisted.includes(interaction.channelId))
+			) {
+				return interaction.reply({
+					content: `You cannot use this command in this channel.\nHead to${interaction.guildId == "1464130182364270696" ? " <#1469730908054491136> or" : ""} any commands/help specific channel.`,
+					flags: MessageFlags.Ephemeral,
+				})
+			}
+		}
 		const isGuild = interaction.authorizingIntegrationOwners[ApplicationIntegrationType.GuildInstall] !== undefined
 
 		await interaction.deferReply({ flags: MessageFlags[isGuild ? "Ephemeral" : "IsComponentsV2"] }).catch(() => {})
