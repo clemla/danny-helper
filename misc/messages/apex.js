@@ -1,5 +1,4 @@
 const {
-	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ContainerBuilder,
@@ -8,12 +7,8 @@ const {
 	ThumbnailBuilder,
 	SeparatorBuilder,
 	SeparatorSpacingSize,
-	MediaGalleryBuilder,
-	MediaGalleryItemBuilder,
 } = require("discord.js")
-const fs = require("fs")
 
-const instantGamingLink = "https://www.instant-gaming.com/?igr=gamer-2b49df"
 const color = [218, 165, 32]
 
 const container = new ContainerBuilder().setAccentColor(color)
@@ -22,8 +17,8 @@ const sep2 = new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
 
 const TitleLines = [
 	"# :crown: Apex donation",
-	"### Own a denuvo game ? You can help us by donating",
-	"-# Both methods take 2 or 10 minutes, as fast than easy yes ;)",
+	"### Own a Denuvo game? You can help us out by donating",
+	"-# The rules changed for new donors, please read this before you DM us",
 ]
 const TitleSec = new SectionBuilder()
 	.addTextDisplayComponents(new TextDisplayBuilder().setContent(TitleLines.join("\n")))
@@ -33,59 +28,50 @@ const TitleSec = new SectionBuilder()
 
 const BenefitsLines = [
 	"## :gift: Benefits",
-	"- Lifetime access to D-games (for 1 year if donation isn't AAA game)",
+	"- Lifetime access to D-games (1 year if the donation isn't a AAA game)",
 	"- No cooldown between activations",
 	"- Special tickets to request games that ran out of keys",
 ]
 const BenefitsText = new TextDisplayBuilder().setContent(BenefitsLines.join("\n"))
 
-const RequirementLines = [
-	"## :rotating_light: Must own the game !",
-	"- Make sure that you bought the game legitimately !",
-	"- Only FULL ACCESS accounts will be accepted (no shared/offline accounts)",
+const RulesLines = [
+	"## :rotating_light: New rules",
+	"- **We don't take family accounts anymore.** If you bought a game on your main and want to share it with us through Steam Family, please don't DM us about it.",
+	"- The easiest way now is a **global Steam key** of the game, but it's not the only option. For other ways to donate, DM <@503862212679696394> or <@817402736232103976>.",
+	"- No cracked games. It has to be an uncracked game released **this year**, games from previous years won't be accepted.",
 ]
-const RequirementSec = new SectionBuilder()
-	.addTextDisplayComponents(new TextDisplayBuilder().setContent(RequirementLines.join("\n")))
-	.setButtonAccessory(new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel("Cheaper & safe games").setURL(instantGamingLink))
+const RulesText = new TextDisplayBuilder().setContent(RulesLines.join("\n"))
 
 const GuideLines = [
-	"## :gear: How to donate ?",
-	"-# Method 1: `2mins` | Method 2: `about 10mins`",
-	":one: Donate enough money to buy the game or send us a game key",
-	`-# From [instant-gaming](<${instantGamingLink}>) for example`,
-	":two: Give us family shared accounts details",
-	"-# Video guide below | Text guide on the right",
-	"- Send accounts or game key to ONE of those:",
-	"  - <@503862212679696394> <@780553392354361344> <@868170669412745216>",
+	"## :gear: How to donate",
+	"Willing to donate a Denuvo game? DM <@503862212679696394> or <@817402736232103976>",
+	"- **Global Steam key:** buy a key of the game and DM it to either one of them",
+	"-# Hit **Find cheapest key**, type the game's AppID and it'll show you the cheapest keys from every store",
+	"- **Other options:** no global key? DM them and they'll tell you the other ways you can donate",
 ]
 const GuideSec = new SectionBuilder()
 	.addTextDisplayComponents(new TextDisplayBuilder().setContent(GuideLines.join("\n")))
-	.setButtonAccessory(new ButtonBuilder().setStyle(ButtonStyle.Secondary).setLabel("Written guide").setCustomId("apex-guide"))
-const GuidePic = new MediaGalleryBuilder().addItems(new MediaGalleryItemBuilder().setURL("attachment://Guide.mp4").setDescription("Video Guide"))
+	.setButtonAccessory(new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel("Find cheapest key").setCustomId("apex-price"))
+
+const OldDonorsText = new TextDisplayBuilder().setContent(
+	"-# Already an Apex donor? Nothing changes for you, this only applies to new donors. Thanks for the support <3",
+)
 
 container.addSectionComponents(TitleSec)
 container.addSeparatorComponents(sep)
 container.addTextDisplayComponents([BenefitsText])
 container.addSeparatorComponents(sep2)
-container.addSectionComponents([RequirementSec])
+container.addTextDisplayComponents([RulesText])
 container.addSeparatorComponents(sep2)
 container.addSectionComponents([GuideSec])
-container.addMediaGalleryComponents([GuidePic])
-
-// Files
-
-const files = {}
-
-files["Guide.mp4"] = new AttachmentBuilder().setName("Guide.mp4").setFile(fs.readFileSync("misc/assets/Guide.mp4"))
+container.addSeparatorComponents(sep2)
+container.addTextDisplayComponents([OldDonorsText])
 
 // Specific sections
 const specifics = {
-	requirement: { container: new ContainerBuilder().setAccentColor(color).addSectionComponents([RequirementSec]), files: [] },
+	requirement: { container: new ContainerBuilder().setAccentColor(color).addTextDisplayComponents([RulesText, OldDonorsText]), files: [] },
 	benefits: { container: new ContainerBuilder().setAccentColor(color).addTextDisplayComponents([BenefitsText]), files: [] },
-	guide: {
-		container: new ContainerBuilder().setAccentColor(color).addSectionComponents([GuideSec]).addMediaGalleryComponents([GuidePic]),
-		files: [files["Guide.mp4"]],
-	},
+	guide: { container: new ContainerBuilder().setAccentColor(color).addSectionComponents([GuideSec]), files: [] },
 }
 
-module.exports = { container, files: Object.values(files), specifics }
+module.exports = { container, files: [], specifics }

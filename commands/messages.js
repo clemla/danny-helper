@@ -85,10 +85,14 @@ module.exports = {
 				"1484177015497166878",
 			]
 
+			const isStaff = interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)
+
 			//prettier-ignore
 			if (
-				(interaction.guildId == "1464130182364270696" && !whitelisted.includes(interaction.channelId)) ||
-				(blacklisted.includes(interaction.channelId))
+				!isStaff && (
+					(interaction.guildId == "1464130182364270696" && !whitelisted.includes(interaction.channelId)) ||
+					(blacklisted.includes(interaction.channelId))
+				)
 			) {
 				return interaction.reply({
 					content: `You cannot use this command in this channel.\nHead to${interaction.guildId == "1464130182364270696" ? " <#1469730908054491136> or" : ""} any commands/help specific channel.`,
