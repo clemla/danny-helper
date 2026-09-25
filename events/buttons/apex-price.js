@@ -105,22 +105,26 @@ module.exports = {
 
 		await interaction.deferReply({ flags: [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral] }).catch(() => {})
 
+		// Edits have to carry the V2 flag again or Discord rejects the container.
+		const send = (container) =>
+			interaction
+				.editReply({ components: [container], flags: [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral], allowedMentions: { parse: [] } })
+				.catch((err) => {
+					console.error("apex-price reply", appid, err)
+					return interaction.editReply({ content: "Something went wrong showing the prices, try again in a minute." }).catch(() => {})
+				})
+		const note = (line) => send(new ContainerBuilder().setAccentColor(color).addTextDisplayComponents(text([line])))
+
 		let result
 		try {
 			result = await require("functions/keyPrices").lookup(appid)
 		} catch (err) {
 			console.error("apex-price", appid, err)
-			return interaction
-				.editReply({ components: [new ContainerBuilder().addTextDisplayComponents(text(["Couldn't reach the price sites right now, try again in a minute."]))] })
-				.catch(() => {})
+			return note("Couldn't reach the price sites right now, try again in a minute.")
 		}
 
-		if (!result.game && !result.deals.length) {
-			return interaction
-				.editReply({ components: [new ContainerBuilder().addTextDisplayComponents(text([`Couldn't find a Steam game with AppID \`${appid}\`.`]))] })
-				.catch(() => {})
-		}
+		if (!result.game && !result.deals.length) return note(`Couldn't find a Steam game with AppID \`${appid}\`.`)
 
-		await interaction.editReply({ components: [buildResult(result)], allowedMentions: { parse: [] } }).catch(console.error)
+		await send(buildResult(result))
 	},
 }
