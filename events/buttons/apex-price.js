@@ -112,20 +112,26 @@ module.exports = {
 				.editReply({ components: [container], flags: [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral], allowedMentions: { parse: [] } })
 				.catch((err) => {
 					console.error("apex-price reply", appid, err)
-					return interaction.editReply({ content: "Something went wrong showing the prices, try again in a minute." }).catch(() => {})
+					const content = "Something went wrong showing the prices, try again in a minute."
+					return interaction
+						.editReply({ content })
+						.catch(() => interaction.followUp({ content, flags: MessageFlags.Ephemeral }))
+						.catch(() => {})
 				})
 		const note = (line) => send(new ContainerBuilder().setAccentColor(color).addTextDisplayComponents(text([line])))
 
-		let result
+		// Never leave them on "thinking": give up on slow price sites after 15s.
+		let timer
+		const deadline = new Promise((_, reject) => (timer = setTimeout(() => reject(new Error("timed out after 15s")), 15000)))
 		try {
-			result = await require("functions/keyPrices").lookup(appid)
+			const result = await Promise.race([require("functions/keyPrices").lookup(appid), deadline])
+			if (!result.game && !result.deals.length) return note(`Couldn't find a Steam game with AppID \`${appid}\`.`)
+			await send(buildResult(result))
 		} catch (err) {
-			console.error("apex-price", appid, err)
-			return note("Couldn't reach the price sites right now, try again in a minute.")
+			console.error("apex-price", appid, err.message)
+			return note("The price site is being slow right now, try again in a minute.")
+		} finally {
+			clearTimeout(timer)
 		}
-
-		if (!result.game && !result.deals.length) return note(`Couldn't find a Steam game with AppID \`${appid}\`.`)
-
-		await send(buildResult(result))
 	},
 }

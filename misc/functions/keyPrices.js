@@ -8,9 +8,12 @@ const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 const NOT_KEYS = ["Steam"]
 
 const cache = new Map()
+const products = new Map()
 
+// Long timeout on purpose: the button gives up after 15s, but a slow lookup keeps
+// going and fills the cache, so trying again a minute later is instant.
 async function get(url, type = "json") {
-	const res = await fetch(url, { headers, signal: AbortSignal.timeout(20000) })
+	const res = await fetch(url, { headers, signal: AbortSignal.timeout(60000) })
 	if (!res.ok) throw new Error(`${new URL(url).host} answered ${res.status}`)
 	return type === "json" ? res.json() : res.text()
 }
@@ -33,10 +36,13 @@ async function steamInfo(appid) {
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "")
 
 async function findProduct(name) {
+	if (products.has(name)) return products.get(name)
 	const url = `${AKS}/api/latest/vaks.php?action=CatalogMultiplatformSearchV1&currency=usd&locale=en_US&search_name=${encodeURIComponent(name)}`
 	const pc = ((await get(url)).products || []).filter((p) => p.operating_systems?.includes("pc") && p.link)
 	const want = norm(name)
-	return pc.find((p) => norm(p.name) === want) || pc.find((p) => norm(p.name).startsWith(want) || want.startsWith(norm(p.name))) || null
+	const found = pc.find((p) => norm(p.name) === want) || pc.find((p) => norm(p.name).startsWith(want) || want.startsWith(norm(p.name))) || null
+	if (found) products.set(name, found)
+	return found
 }
 
 // The game page embeds every offer as `var gamePageTrans = {...}`, followed by more script.
@@ -83,13 +89,24 @@ async function findDeals(name) {
 
 async function lookup(appid) {
 	const hit = cache.get(appid)
+	if (hit?.pending) return hit.pending
 	if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.result
 
-	const game = await steamInfo(appid)
-	const deals = game ? await findDeals(game.name) : []
-	const result = { appid, game, deals }
-	cache.set(appid, { at: Date.now(), result })
-	return result
+	// Share one in-flight lookup, so clicking again while it's slow doesn't pile up requests.
+	const pending = (async () => {
+		const game = await steamInfo(appid)
+		const deals = game ? await findDeals(game.name) : []
+		return { appid, game, deals }
+	})()
+	cache.set(appid, { pending })
+	try {
+		const result = await pending
+		cache.set(appid, { at: Date.now(), result })
+		return result
+	} catch (err) {
+		cache.delete(appid)
+		throw err
+	}
 }
 
 module.exports = { lookup }
