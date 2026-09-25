@@ -1,6 +1,4 @@
 const {
-	ButtonBuilder,
-	ButtonStyle,
 	ContainerBuilder,
 	SectionBuilder,
 	TextDisplayBuilder,
@@ -45,13 +43,11 @@ const RulesText = new TextDisplayBuilder().setContent(RulesLines.join("\n"))
 const GuideLines = [
 	"## :gear: How to donate",
 	"Willing to donate a Denuvo game? DM <@503862212679696394> or <@817402736232103976>",
-	"- **Global Steam key:** buy a key of the game and DM it to either one of them",
-	"-# Hit **Find cheapest key**, type the game's AppID and it'll show you the cheapest keys from every store",
-	"- **Other options:** no global key? DM them and they'll tell you the other ways you can donate",
+	"- **Global Steam key:** buy a key of the game from wherever you like and DM it to either one of them",
+	"-# It has to say **Global**. EU, US or other region locked keys won't be accepted",
+	"- **Other options:** can't get a global key or not sure where to look? DM them and they'll guide you",
 ]
-const GuideSec = new SectionBuilder()
-	.addTextDisplayComponents(new TextDisplayBuilder().setContent(GuideLines.join("\n")))
-	.setButtonAccessory(new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel("Find cheapest key").setCustomId("apex-price"))
+const GuideText = new TextDisplayBuilder().setContent(GuideLines.join("\n"))
 
 const OldDonorsText = new TextDisplayBuilder().setContent(
 	"-# Already an Apex donor? Nothing changes for you, this only applies to new donors. Thanks for the support <3",
@@ -63,7 +59,7 @@ container.addTextDisplayComponents([BenefitsText])
 container.addSeparatorComponents(sep2)
 container.addTextDisplayComponents([RulesText])
 container.addSeparatorComponents(sep2)
-container.addSectionComponents([GuideSec])
+container.addTextDisplayComponents([GuideText])
 container.addSeparatorComponents(sep2)
 container.addTextDisplayComponents([OldDonorsText])
 
@@ -71,7 +67,7 @@ container.addTextDisplayComponents([OldDonorsText])
 const specifics = {
 	requirement: { container: new ContainerBuilder().setAccentColor(color).addTextDisplayComponents([RulesText, OldDonorsText]), files: [] },
 	benefits: { container: new ContainerBuilder().setAccentColor(color).addTextDisplayComponents([BenefitsText]), files: [] },
-	guide: { container: new ContainerBuilder().setAccentColor(color).addSectionComponents([GuideSec]), files: [] },
+	guide: { container: new ContainerBuilder().setAccentColor(color).addTextDisplayComponents([GuideText]), files: [] },
 }
 
 module.exports = { container, files: [], specifics }
