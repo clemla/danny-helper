@@ -1,25 +1,22 @@
-const CHEAPSHARK = "https://www.cheapshark.com/api/1.0"
-const ITAD = "https://api.isthereanydeal.com"
-const ITAD_KEY = process.env.itad_key || "a18369ec8c2f95b5f9f435689e6e203c5cecb4a7"
-const headers = { "User-Agent": "DannyHelper/1.0 (LuaTools Discord bot)" }
+// Global Steam key prices come from AllKeyShop, which tags every offer with its
+// region. Official stores (what IsThereAnyDeal/CheapShark list) often sell
+// region-locked keys, and CheapShark also blocks server IPs.
+const AKS = "https://www.allkeyshop.com"
+const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" }
 
-// Stores that don't hand you a Steam key you can send to someone.
-const NOT_KEYS = ["Steam", "GOG", "Epic Games Store"]
+// Buying here doesn't give you a key you can send to someone.
+const NOT_KEYS = ["Steam"]
 
 const cache = new Map()
-let stores = null
 
-async function getJson(url, options = {}) {
-	const res = await fetch(url, { ...options, headers: { ...headers, ...options.headers }, signal: AbortSignal.timeout(15000) })
-	if (!res.ok) {
-		const body = await res.text().catch(() => "")
-		throw new Error(`${new URL(url).host} answered ${res.status} ${body.slice(0, 150)}`)
-	}
-	return res.json()
+async function get(url, type = "json") {
+	const res = await fetch(url, { headers, signal: AbortSignal.timeout(20000) })
+	if (!res.ok) throw new Error(`${new URL(url).host} answered ${res.status}`)
+	return type === "json" ? res.json() : res.text()
 }
 
 async function steamInfo(appid) {
-	const data = await getJson(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=us&l=english`).catch(() => null)
+	const data = await get(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=us&l=english`).catch(() => null)
 	// Steam sometimes files the reply under another id, so take whatever entry it sent.
 	const entry = data && (data[appid] || Object.values(data)[0])
 	if (!entry?.success) return null
@@ -33,60 +30,63 @@ async function steamInfo(appid) {
 	}
 }
 
-// IsThereAnyDeal is built for servers. CheapShark rate limits hosting IPs hard
-// (429 "API misuse"), so it only works as a fallback from a home connection.
-async function itadDeals(appid, key) {
-	const found = await getJson(`${ITAD}/games/lookup/v1?key=${key}&appid=${appid}`)
-	if (!found?.found || !found.game?.id) return []
-	const prices = await getJson(`${ITAD}/games/prices/v3?key=${key}&country=US`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify([found.game.id]),
-	})
-	return (prices?.[0]?.deals || [])
-		// Only offers ITAD tags as Steam keys. Untagged ones (Newegg, Steam itself) are skipped.
-		.filter((d) => !NOT_KEYS.includes(d.shop?.name) && (d.drm || []).some((x) => x.name === "Steam"))
-		.map((d) => ({
-			store: d.shop.name,
-			price: Number(d.price?.amount),
-			retail: Number(d.regular?.amount),
-			url: d.url,
-		}))
+const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "")
+
+async function findProduct(name) {
+	const url = `${AKS}/api/latest/vaks.php?action=CatalogMultiplatformSearchV1&currency=usd&locale=en_US&search_name=${encodeURIComponent(name)}`
+	const pc = ((await get(url)).products || []).filter((p) => p.operating_systems?.includes("pc") && p.link)
+	const want = norm(name)
+	return pc.find((p) => norm(p.name) === want) || pc.find((p) => norm(p.name).startsWith(want) || want.startsWith(norm(p.name))) || null
 }
 
-async function cheapsharkDeals(appid) {
-	const games = await getJson(`${CHEAPSHARK}/games?steamAppID=${appid}`)
-	if (!games.length) return []
-	if (!stores) {
-		const list = await getJson(`${CHEAPSHARK}/stores`)
-		stores = Object.fromEntries(list.map((s) => [s.storeID, s.storeName]))
+// The game page embeds every offer as `var gamePageTrans = {...}`, followed by more script.
+function readOffers(html) {
+	const start = html.indexOf("{", html.indexOf("var gamePageTrans"))
+	if (start < 0) return null
+	let depth = 0
+	let inString = false
+	for (let i = start; i < html.length; i++) {
+		const c = html[i]
+		if (inString) {
+			if (c === "\\") i++
+			else if (c === '"') inString = false
+		} else if (c === '"') inString = true
+		else if (c === "{") depth++
+		else if (c === "}" && --depth === 0) return JSON.parse(html.slice(start, i + 1))
 	}
-	const info = await getJson(`${CHEAPSHARK}/games?id=${games[0].gameID}`)
-	return info.deals
-		.map((d) => ({
-			store: stores[d.storeID] || `Store ${d.storeID}`,
-			price: Number(d.price),
-			retail: Number(d.retailPrice),
-			url: `https://www.cheapshark.com/redirect?dealID=${d.dealID}`,
-		}))
-		.filter((d) => !NOT_KEYS.includes(d.store))
+	return null
 }
 
-async function findDeals(appid) {
-	try {
-		return await itadDeals(appid, ITAD_KEY)
-	} catch (err) {
-		console.error("keyPrices: IsThereAnyDeal failed, trying CheapShark.", err.message)
-	}
-	return cheapsharkDeals(appid)
+async function findDeals(name) {
+	const product = await findProduct(name)
+	if (!product) return []
+	const t = readOffers(await get(product.link, "text"))
+	if (!t?.prices) return []
+
+	const seen = new Set()
+	return t.prices
+		.filter((o) => t.regions?.[o.region]?.region_name === "GLOBAL" && !o.account && o.activationPlatform === "steam" && o.dispo == 1)
+		.filter((o) => !NOT_KEYS.includes(o.merchantName))
+		.sort((a, b) => a.price - b.price)
+		.filter((o) => {
+			const key = `${o.merchant}:${o.edition}`
+			return !seen.has(key) && seen.add(key)
+		})
+		.map((o) => ({
+			store: o.merchantName,
+			price: Number(o.price),
+			edition: t.editions?.[o.edition]?.name || null,
+			code: o.voucher_code || null,
+			url: `${AKS}/redirection/offer/usd/${o.id}?locale=en_US&merchant=${o.merchant}`,
+		}))
 }
 
 async function lookup(appid) {
 	const hit = cache.get(appid)
 	if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.result
 
-	const [game, deals] = await Promise.all([steamInfo(appid), findDeals(appid)])
-	deals.sort((a, b) => a.price - b.price)
+	const game = await steamInfo(appid)
+	const deals = game ? await findDeals(game.name) : []
 	const result = { appid, game, deals }
 	cache.set(appid, { at: Date.now(), result })
 	return result

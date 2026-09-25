@@ -62,15 +62,16 @@ function buildResult({ appid, game, deals }) {
 	container.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
 
 	if (!deals.length) {
-		container.addTextDisplayComponents(text([`No key store has this game listed right now. DM ${contacts} for other ways to donate.`]))
+		container.addTextDisplayComponents(text([`Couldn't find a global Steam key for this game right now. DM ${contacts} for other ways to donate.`]))
 		return container
 	}
 
+	container.addTextDisplayComponents(text(["### Cheapest global Steam keys"]))
 	for (const d of deals.slice(0, 6)) {
-		const off = d.retail > d.price ? ` ~~$${d.retail.toFixed(2)}~~ \`-${Math.round((1 - d.price / d.retail) * 100)}%\`` : ""
+		const extra = [d.edition, d.code && `code \`${d.code}\``].filter(Boolean).join(" | ")
 		container.addSectionComponents(
 			new SectionBuilder()
-				.addTextDisplayComponents(text([`**$${d.price.toFixed(2)}** at **${d.store}**${off}`]))
+				.addTextDisplayComponents(text([`**$${d.price.toFixed(2)}** at **${d.store}**`, extra && `-# ${extra}`].filter(Boolean)))
 				.setButtonAccessory(new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel("Buy").setURL(d.url)),
 		)
 	}
@@ -78,7 +79,7 @@ function buildResult({ appid, game, deals }) {
 	container.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
 	container.addTextDisplayComponents(
 		text([
-			`-# Prices in USD. Check the store page says the key is global (or works in your region) before you pay, then DM the key to either ${contacts}.`,
+			`-# Prices in USD from AllKeyShop. If a code is shown, use it at checkout to get that price. Once you have the key, DM it to either ${contacts}.`,
 		]),
 	)
 	return container
