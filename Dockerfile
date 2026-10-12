@@ -1,16 +1,13 @@
-FROM oven/bun:latest
+FROM oven/bun:1
 
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y git \
-    && rm -rf /var/lib/apt/lists/*
+COPY package.json bun.lock* ./
 
-RUN git config --global --add safe.directory /app
-
-COPY package.json bun.lock ./
-RUN bun install
+RUN bun install --frozen-lockfile
 
 COPY . .
 
-CMD ["bun", "run", "main.js"]
+ENV NODE_ENV=production
+
+CMD ["bun", "run", "start"]

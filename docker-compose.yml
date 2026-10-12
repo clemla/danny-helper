@@ -1,17 +1,14 @@
 services:
-  bot:
-    container_name: danny-helper
-
+  danny-helper:
     build:
       context: .
-
+      dockerfile: Dockerfile
+    container_name: danny-helper
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
-
-    restart: unless-stopped
-
-    volumes:
-      - .:/app
-      - /app/node_modules
-
-    command: sh -c "git pull --ff-only && bun run main.js"
+      TZ: Europe/Brussels
+    command: ["bun", "run", "start"]
